@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "author": "Anonymous maker",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": -38.4, "left": -91.16, "attrs": {} },
+    { "type": "board-mfrc522", "id": "rfid1", "top": 16.55, "left": 118.64, "attrs": {} },
+    {
+      "type": "board-ssd1306",
+      "id": "oled1",
+      "top": 195.14,
+      "left": -66.97,
+      "attrs": { "i2cAddress": "0x3c" }
+    }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "rfid1:3.3V", "esp:3V3", "red", [ "h-19.2", "v-172.8", "h-192.15" ] ],
+    [ "rfid1:GND", "esp:GND.2", "black", [ "h-67.2", "v-105.6" ] ],
+    [ "rfid1:MOSI", "esp:23", "cyan", [ "h-38.4", "v-76.8" ] ],
+    [ "rfid1:MISO", "esp:19", "yellow", [ "h-48", "v-19.2" ] ],
+    [ "rfid1:SCK", "esp:18", "blue", [ "h-38.4", "v9.6" ] ],
+    [ "esp:GND.1", "oled1:GND", "black", [ "h-28.65", "v86.4", "h86.4" ] ],
+    [ "esp:5V", "oled1:VCC", "red", [ "h-9.45", "v28.8", "h76.65" ] ],
+    [ "rfid1:RST", "esp:4", "green", [ "h-105.6", "v-9.6" ] ],
+    [ "rfid1:SDA", "esp:5", "violet", [ "v-9.6", "h-76.8", "v28.8" ] ],
+    [ "esp:21", "oled1:SDA", "white", [ "h9.6", "v144", "h-19.27" ] ],
+    [ "oled1:SCL", "esp:22", "gray", [ "v-28.8", "h38.7", "v-163.2" ] ]
+  ],
+  "dependencies": {}
+}
