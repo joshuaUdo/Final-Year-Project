@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Adeleke University — Smart Cafeteria</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0a0f1e;
+      --surface: #111827;
+      --surface2: #1a2235;
+      --border: #1f2d45;
+      --accent: #00d4aa;
+      --accent2: #0099ff;
+      --danger: #ff4d6d;
+      --warning: #ffbe0b;
+      --text: #e8edf5;
+      --text-muted: #6b7a99;
+      --mono: 'Space Mono', monospace;
+      --sans: 'Syne', sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Background grid */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 212, 170, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 170, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Glow orbs */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -200px;
+      right: -200px;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(0, 212, 170, 0.06) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Header ── */
+    header {
+      padding: 32px 0 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 48px;
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .logo-block { display: flex; align-items: center; gap: 16px; }
+
+    .logo-icon {
+      width: 48px; height: 48px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 0 24px rgba(0, 212, 170, 0.3);
+    }
+
+    .logo-text h1 {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: var(--text);
+    }
+
+    .logo-text p {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--mono);
+      margin-top: 2px;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-size: 12px;
+      font-family: var(--mono);
+      color: var(--text-muted);
+    }
+
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* ── Stats Row ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+
+    .stat-card:hover { border-color: rgba(0, 212, 170, 0.3); }
+
+    .stat-label {
+      font-size: 11px;
+      font-family: var(--mono);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .stat-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ── Main Grid ── */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 800px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Match students panel height to register form and make scrollable */
+    .main-grid > .panel:nth-child(2) {
+      display: flex;
+      flex-direction: column;
+      height: fit-content;
+    }
+
+    .main-grid > .panel:nth-child(2) .panel-body {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .main-grid > .panel:nth-child(2) .table-wrap {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: auto;
+    }
+
+    /* ── Panel ── */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-title span {
+      font-size: 16px;
+    }
+
+    .panel-body { padding: 24px; }
+
+    /* ── Form ── */
+    .form-group { margin-bottom: 20px; }
+
+    label {
+      display: block;
+      font-size: 11px;
+      font-family: var(--mono);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.1);
+    }
+
+    input[type="text"]::placeholder { color: var(--text-muted); }
+
+    .uid-input-wrap { position: relative; }
+
+    .uid-hint {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 10px;
+      font-family: var(--mono);
+      color: var(--text-muted);
+      background: var(--surface);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.3px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #0a0f1e;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(0, 212, 170, 0.3);
+    }
+
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* ── Toast ── */
+    .toast {
+      margin-top: 16px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-family: var(--mono);
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .toast.show { display: block; }
+
+    .toast.success {
+      background: rgba(0, 212, 170, 0.1);
+      border: 1px solid rgba(0, 212, 170, 0.3);
+      color: var(--accent);
+    }
+
+    .toast.error {
+      background: rgba(255, 77, 109, 0.1);
+      border: 1px solid rgba(255, 77, 109, 0.3);
+      color: var(--danger);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Students Table ── */
+    .search-bar {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 16px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      outline: none;
+      margin-bottom: 16px;
+      transition: border-color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .search-bar:focus { border-color: var(--accent); }
+    .search-bar::placeholder { color: var(--text-muted); }
+
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    thead tr {
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 10px;
+      font-family: var(--mono);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 400;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid rgba(31, 45, 69, 0.5);
+      transition: background 0.15s;
+    }
+
+    tbody tr:hover { background: var(--surface2); }
+    tbody tr:last-child { border-bottom: none; }
+
+    td {
+      padding: 14px 12px;
+      vertical-align: middle;
+    }
+
+    .td-name { font-weight: 600; font-size: 14px; }
+
+    .td-uid {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--accent);
+      background: rgba(0, 212, 170, 0.08);
+      padding: 4px 8px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    .td-date {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .td-meal {
+      font-family: var(--mono);
+      font-size: 11px;
+    }
+
+    .meal-badge {
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .meal-badge.lunch {
+      background: rgba(255, 190, 11, 0.15);
+      color: var(--warning);
+      border: 1px solid rgba(255, 190, 11, 0.3);
+    }
+
+    .meal-badge.dinner {
+      background: rgba(0, 153, 255, 0.15);
+      color: var(--accent2);
+      border: 1px solid rgba(0, 153, 255, 0.3);
+    }
+
+    .meal-badge.none {
+      background: rgba(107, 122, 153, 0.15);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-delete {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-family: var(--mono);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-delete:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: rgba(255, 77, 109, 0.08);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-muted);
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+
+    .empty-state .empty-icon { font-size: 32px; margin-bottom: 12px; }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      margin-top: 10px;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(0, 212, 170, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-danger {
+      background: transparent;
+      border: 1px solid var(--danger);
+      color: var(--danger);
+      margin-top: 10px;
+    }
+
+    .btn-danger:hover {
+      background: rgba(255, 77, 109, 0.08);
+    }
+
+    /* Enrollment status banner */
+    .enroll-banner {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      background: rgba(0, 212, 170, 0.08);
+      border: 1px solid rgba(0, 212, 170, 0.3);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      font-family: var(--mono);
+      color: var(--accent);
+      animation: fadeIn 0.3s ease;
+    }
+
+    .enroll-banner.show { display: flex; }
+
+    .enroll-banner .spinner {
+      border-color: rgba(0, 212, 170, 0.2);
+      border-top-color: var(--accent);
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 20px 0;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .refresh-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-family: var(--mono);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .refresh-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn-transfer {
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-family: var(--mono);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-transfer:hover { background: rgba(0,212,170,0.1); }
+    .btn-transfer:disabled { opacity: 0.4; cursor: not-allowed; }
+    .ts-invalid { color: var(--danger); font-weight: 700; }
+    .ts-valid   { color: var(--accent); }
+
+    input[type="datetime-local"] {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 8px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 11px;
+      outline: none;
+    }
+    input[type="datetime-local"]:focus { border-color: var(--accent); }
+
+    /* Scrollbar styling for students table */
+    .main-grid > .panel:nth-child(2) .table-wrap::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    .main-grid > .panel:nth-child(2) .table-wrap::-webkit-scrollbar-track {
+      background: var(--surface2);
+      border-radius: 4px;
+    }
+
+    .main-grid > .panel:nth-child(2) .table-wrap::-webkit-scrollbar-thumb {
+      background: rgba(0, 212, 170, 0.4);
+      border-radius: 4px;
+    }
+
+    .main-grid > .panel:nth-child(2) .table-wrap::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 212, 170, 0.6);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <div class="header-inner">
+      <div class="logo-block">
+        <div class="logo-icon">🍽️</div>
+        <div class="logo-text">
+          <h1>Smart Cafeteria System</h1>
+          <p>Adeleke University · Admin Portal</p>
+        </div>
+      </div>
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        <span id="conn-status">Connecting...</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Total Students</div>
+      <div class="stat-value" id="stat-total">—</div>
+      <div class="stat-sub">Registered cards</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Lunch Today</div>
+      <div class="stat-value" id="stat-lunch">—</div>
+      <div class="stat-sub">Meals collected</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Dinner Today</div>
+      <div class="stat-value" id="stat-dinner">—</div>
+      <div class="stat-sub">Meals collected</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Offline Logs</div>
+      <div class="stat-value" id="stat-offline">—</div>
+      <div class="stat-sub">Pending transfer</div>
+    </div>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="main-grid">
+
+    <!-- Registration Form -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title"><span>➕</span> Register Student</div>
+      </div>
+      <div class="panel-body">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="input-name" placeholder="e.g. Joshua Adeleke" />
+        </div>
+        <div class="form-group">
+          <label>RFID Card UID</label>
+          <div class="uid-input-wrap">
+            <input type="text" id="input-uid" placeholder="e.g. A1B2C3D4" maxlength="20"/>
+            <span class="uid-hint">HEX</span>
+          </div>
+        </div>
+
+        <!-- Enrollment banner — shown while waiting for card tap -->
+        <div class="enroll-banner" id="enroll-banner">
+          <span class="spinner" style="width:14px;height:14px;border-width:2px;display:inline-block;border-radius:50%;border-style:solid;animation:spin 0.7s linear infinite;flex-shrink:0;"></span>
+          <span id="enroll-banner-text">Waiting for card tap on ESP32...</span>
+        </div>
+
+        <!-- Scan Card button — triggers enrollment mode on ESP32 -->
+        <button class="btn btn-secondary" id="scan-btn" onclick="startEnrollment()">
+          📡 Scan Card via ESP32
+        </button>
+        <button class="btn btn-danger" id="cancel-btn" style="display:none;" onclick="cancelEnrollment()">
+          ✕ Cancel Scan
+        </button>
+
+        <hr class="divider"/>
+        <button class="btn btn-primary" id="register-btn" onclick="registerStudent()">
+          Register Student
+        </button>
+        <div class="toast" id="toast"></div>
+      </div>
+    </div>
+
+    <!-- Students Table -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title"><span>👥</span> Registered Students</div>
+        <button class="refresh-btn" onclick="loadStudents()">↻ Refresh</button>
+      </div>
+      <div class="panel-body">
+        <input type="text" class="search-bar" id="search-bar" placeholder="Search by name or UID..." oninput="filterStudents()" />
+        <div class="table-wrap">
+          <div id="table-container">
+            <div class="loading"><span class="spinner"></span>Loading students...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Offline Logs Review Panel -->
+  <div class="panel" style="margin-top: 24px; margin-bottom: 48px;">
+    <div class="panel-header">
+      <div class="panel-title"><span>📋</span> Offline Logs — Pending Transfer</div>
+      <div style="display:flex;gap:8px;">
+        <button class="refresh-btn" onclick="loadOfflineLogs()">↻ Refresh</button>
+        <button class="refresh-btn" id="bulk-transfer-btn"
+          style="border-color:var(--accent);color:var(--accent);"
+          onclick="transferAll()">
+          Transfer All
+        </button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <p style="font-size:12px;font-family:var(--mono);color:var(--text-muted);margin-bottom:16px;">
+        Review each record's timestamp before transferring. Records showing <span style="color:var(--danger);">1970</span> have an invalid timestamp — correct the date/time before transferring. Transfers are permanent and protected against duplicates.
+      </p>
+      <div class="table-wrap">
+        <div id="offline-table-container">
+          <div class="loading"><span class="spinner"></span>Loading offline logs...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ── Supabase Config ──────────────────────────────────────
+  const SUPABASE_URL = "https://gqegluzncbgikuwngehf.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdxZWdsdXpuY2JnaWt1d25nZWhmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5MjE3MTksImV4cCI6MjA4NzQ5NzcxOX0.MUVnUxSmkCzkKZz0kFuQ8HmUhE3k_pNBmwi8YDaJwLA";
+
+  const headers = {
+    "Content-Type": "application/json",
+    "apikey": SUPABASE_KEY,
+    "Authorization": `Bearer ${SUPABASE_KEY}`
+  };
+
+  let allStudents = [];
+
+  // ── On Load ─────────────────────────────────────────────
+  window.onload = () => {
+    loadStudents();
+    loadStats();
+    loadOfflineLogs();
+  };
+
+  // ── Fetch Students ───────────────────────────────────────
+  async function loadStudents() {
+    document.getElementById("table-container").innerHTML =
+      `<div class="loading"><span class="spinner"></span>Loading students...</div>`;
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/students?select=*&order=full_name.asc`, { headers });
+      if (!res.ok) throw new Error("Failed to fetch");
+      allStudents = await res.json();
+      document.getElementById("conn-status").textContent = "Connected to Supabase";
+      await renderTable(allStudents);
+    } catch (e) {
+      document.getElementById("conn-status").textContent = "Connection error";
+      document.getElementById("table-container").innerHTML =
+        `<div class="empty-state"><div class="empty-icon">⚠️</div>Could not connect to Supabase.<br/>Check your credentials.</div>`;
+    }
+  }
+
+  // ── Load Stats ───────────────────────────────────────────
+  async function loadStats() {
+    try {
+      // Total students
+      const s = await fetch(`${SUPABASE_URL}/rest/v1/students?select=id`, { headers });
+      const students = await s.json();
+      document.getElementById("stat-total").textContent = students.length;
+
+      // Today's date
+      const today = new Date().toISOString().split("T")[0];
+
+      // Lunch today
+      const l = await fetch(
+        `${SUPABASE_URL}/rest/v1/meal_logs?select=id&meal_type=eq.LUNCH&collected_at=gte.${today}T00:00:00`,
+        { headers }
+      );
+      const lunch = await l.json();
+      document.getElementById("stat-lunch").textContent = lunch.length;
+
+      // Dinner today
+      const d = await fetch(
+        `${SUPABASE_URL}/rest/v1/meal_logs?select=id&meal_type=eq.DINNER&collected_at=gte.${today}T00:00:00`,
+        { headers }
+      );
+      const dinner = await d.json();
+      document.getElementById("stat-dinner").textContent = dinner.length;
+
+      // Offline logs pending
+      const o = await fetch(
+        `${SUPABASE_URL}/rest/v1/offline_logs?select=id&transferred=eq.false`,
+        { headers }
+      );
+      const offline = await o.json();
+      document.getElementById("stat-offline").textContent = offline.length;
+
+    } catch (e) {
+      console.error("Stats error:", e);
+    }
+  }
+
+  // ── Render Table ─────────────────────────────────────────
+  async function renderTable(students) {
+    if (students.length === 0) {
+      document.getElementById("table-container").innerHTML =
+        `<div class="empty-state"><div class="empty-icon">🪪</div>No students registered yet.<br/>Add one using the form.</div>`;
+      return;
+    }
+
+    // Fetch today's meal logs for all students in one request
+    const today = new Date().toISOString().split("T")[0];
+    let mealMap = {}; // { rfid_uid: { meal_type, collected_at } }
+
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/meal_logs?select=rfid_uid,meal_type,collected_at&collected_at=gte.${today}T00:00:00&order=collected_at.desc`,
+        { headers }
+      );
+      const logs = await res.json();
+      // Keep only the most recent log per student per day
+      logs.forEach(log => {
+        if (!mealMap[log.rfid_uid]) {
+          mealMap[log.rfid_uid] = log;
+        }
+      });
+    } catch (e) {
+      console.error("Failed to fetch meal logs:", e);
+    }
+
+    let rows = students.map(s => {
+      const log = mealMap[s.rfid_uid];
+      const lastMeal = log ? formatDate(log.collected_at) : (s.last_meal_at ? formatDate(s.last_meal_at) : "Never");
+      const mealBadge = log ? getMealBadge(log.meal_type) : `<span class="meal-badge none">—</span>`;
+      return `
+        <tr>
+          <td class="td-name">${escHtml(s.full_name)}</td>
+          <td><span class="td-uid">${escHtml(s.rfid_uid)}</span></td>
+          <td class="td-date">${lastMeal}</td>
+          <td>${mealBadge}</td>
+          <td><button class="btn-delete" onclick="deleteStudent('${s.id}', '${escHtml(s.full_name)}')">Remove</button></td>
+        </tr>`;
+    }).join("");
+
+    document.getElementById("table-container").innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>RFID UID</th>
+            <th>Last Meal Today</th>
+            <th>Meal Type</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  // ── Filter Students ──────────────────────────────────────
+  async function filterStudents() {
+    const q = document.getElementById("search-bar").value.toLowerCase();
+    const filtered = allStudents.filter(s =>
+      s.full_name.toLowerCase().includes(q) ||
+      s.rfid_uid.toLowerCase().includes(q)
+    );
+    await renderTable(filtered);
+  }
+
+  // ── Register Student ─────────────────────────────────────
+  async function registerStudent() {
+    const name = document.getElementById("input-name").value.trim();
+    const uid  = document.getElementById("input-uid").value.trim().toUpperCase();
+
+    if (!name || !uid) {
+      showToast("Please fill in both fields.", "error");
+      return;
+    }
+
+    if (!/^[A-F0-9]+$/i.test(uid)) {
+      showToast("UID must be hexadecimal (e.g. A1B2C3D4).", "error");
+      return;
+    }
+
+    const btn = document.getElementById("register-btn");
+    btn.disabled = true;
+    btn.textContent = "Registering...";
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/students`, {
+        method: "POST",
+        headers: { ...headers, "Prefer": "return=minimal" },
+        body: JSON.stringify({ full_name: name, rfid_uid: uid })
+      });
+
+      if (res.status === 201) {
+        showToast(`✓ ${name} registered successfully!`, "success");
+        document.getElementById("input-name").value = "";
+        document.getElementById("input-uid").value = "";
+        loadStudents();
+        loadStats();
+      } else if (res.status === 409) {
+        showToast("This UID is already registered.", "error");
+      } else {
+        const err = await res.json();
+        showToast("Error: " + (err.message || "Unknown error"), "error");
+      }
+    } catch (e) {
+      showToast("Network error. Check your connection.", "error");
+    }
+
+    btn.disabled = false;
+    btn.textContent = "Register Student";
+  }
+
+  // ── Delete Student ───────────────────────────────────────
+  async function deleteStudent(id, name) {
+    if (!confirm(`Remove ${name} from the system?`)) return;
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/students?id=eq.${id}`, {
+        method: "DELETE",
+        headers
+      });
+      if (res.ok) {
+        showToast(`${name} has been removed.`, "success");
+        loadStudents();
+        loadStats();
+      } else {
+        showToast("Failed to remove student.", "error");
+      }
+    } catch (e) {
+      showToast("Network error.", "error");
+    }
+  }
+
+  // ── Enrollment Mode ──────────────────────────────────────
+  // Tracks the active enrollment session
+  let enrollmentSessionId = null;
+  let enrollmentPollTimer = null;
+
+  // Start enrollment — creates a WAITING session in Supabase
+  // ESP32 polls this and enters enrollment mode automatically
+  async function startEnrollment() {
+    try {
+      document.getElementById("scan-btn").style.display = "none";
+      document.getElementById("cancel-btn").style.display = "block";
+      document.getElementById("enroll-banner").classList.add("show");
+      document.getElementById("enroll-banner-text").textContent = "Waiting for card tap on ESP32...";
+      document.getElementById("input-uid").value = "";
+      document.getElementById("input-uid").placeholder = "UID will appear here...";
+
+      // Insert a WAITING session into enrollment_queue
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/enrollment_queue`, {
+        method: "POST",
+        headers: { ...headers, "Prefer": "return=representation" },
+        body: JSON.stringify({ status: "WAITING" })
+      });
+
+      if (!res.ok) throw new Error("Failed to create enrollment session");
+      const data = await res.json();
+      enrollmentSessionId = data[0].id;
+      console.log("Enrollment session created: " + enrollmentSessionId);
+
+      // Start polling for the scanned UID
+      enrollmentPollTimer = setInterval(pollForUID, 2000);
+
+    } catch (e) {
+      showToast("Failed to start enrollment. Check connection.", "error");
+      resetEnrollmentUI();
+    }
+  }
+
+  // Poll Supabase every 2 seconds to check if ESP32 has submitted a UID
+  async function pollForUID() {
+    if (!enrollmentSessionId) return;
+
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/enrollment_queue?id=eq.${enrollmentSessionId}&select=status,scanned_uid`,
+        { headers }
+      );
+      const data = await res.json();
+      if (!data || data.length === 0) return;
+
+      const session = data[0];
+
+      if (session.status === "SCANNED" && session.scanned_uid) {
+        // ESP32 submitted a UID — auto-fill the form
+        const uid = session.scanned_uid.toUpperCase();
+        document.getElementById("input-uid").value = uid;
+        document.getElementById("enroll-banner-text").textContent = `✓ Card read: ${uid}`;
+
+        // Mark session as COMPLETED
+        await fetch(`${SUPABASE_URL}/rest/v1/enrollment_queue?id=eq.${enrollmentSessionId}`, {
+          method: "PATCH",
+          headers: { ...headers, "Prefer": "return=minimal" },
+          body: JSON.stringify({ status: "COMPLETED" })
+        });
+
+        clearInterval(enrollmentPollTimer);
+        enrollmentPollTimer = null;
+
+        showToast(`✓ Card UID captured: ${uid}`, "success");
+
+        // Keep banner visible briefly then reset
+        setTimeout(() => {
+          document.getElementById("enroll-banner").classList.remove("show");
+          document.getElementById("scan-btn").style.display = "block";
+          document.getElementById("cancel-btn").style.display = "none";
+          document.getElementById("input-uid").placeholder = "e.g. A1B2C3D4";
+          enrollmentSessionId = null;
+        }, 2000);
+
+      } else if (session.status === "CANCELLED") {
+        showToast("Enrollment session cancelled.", "error");
+        resetEnrollmentUI();
+      }
+    } catch (e) {
+      console.error("Poll error:", e);
+    }
+  }
+
+  // Cancel enrollment — marks session as CANCELLED in Supabase
+  async function cancelEnrollment() {
+    if (enrollmentSessionId) {
+      await fetch(`${SUPABASE_URL}/rest/v1/enrollment_queue?id=eq.${enrollmentSessionId}`, {
+        method: "PATCH",
+        headers: { ...headers, "Prefer": "return=minimal" },
+        body: JSON.stringify({ status: "CANCELLED" })
+      });
+    }
+    resetEnrollmentUI();
+    showToast("Enrollment cancelled.", "error");
+  }
+
+  function resetEnrollmentUI() {
+    clearInterval(enrollmentPollTimer);
+    enrollmentPollTimer = null;
+    enrollmentSessionId = null;
+    document.getElementById("enroll-banner").classList.remove("show");
+    document.getElementById("scan-btn").style.display = "block";
+    document.getElementById("cancel-btn").style.display = "none";
+    document.getElementById("input-uid").placeholder = "e.g. A1B2C3D4";
+  }
+
+  // ── Helpers ──────────────────────────────────────────────
+  function showToast(msg, type) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.className = `toast show ${type}`;
+    setTimeout(() => t.className = "toast", 4000);
+  }
+
+  function formatDate(iso) {
+    if (!iso) return "Never";
+    const d = new Date(iso);
+    return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) +
+           " · " + d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  }
+
+  function getMealBadge(mealType) {
+    if (!mealType) return `<span class="meal-badge none">—</span>`;
+    if (mealType === "LUNCH")  return `<span class="meal-badge lunch">Lunch</span>`;
+    if (mealType === "DINNER") return `<span class="meal-badge dinner">Dinner</span>`;
+    return `<span class="meal-badge none">—</span>`;
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  // ── Offline Logs ─────────────────────────────────────────
+
+  let offlineLogs = [];
+
+  async function loadOfflineLogs() {
+    document.getElementById("offline-table-container").innerHTML =
+      `<div class="loading"><span class="spinner"></span>Loading offline logs...</div>`;
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/offline_logs?transferred=eq.false&order=captured_at.desc&select=*`,
+        { headers }
+      );
+      offlineLogs = await res.json();
+      renderOfflineTable(offlineLogs);
+      // Update stat badge
+      document.getElementById("stat-offline").textContent = offlineLogs.length;
+    } catch (e) {
+      document.getElementById("offline-table-container").innerHTML =
+        `<div class="empty-state"><div class="empty-icon">⚠️</div>Failed to load offline logs.</div>`;
+    }
+  }
+
+  function renderOfflineTable(logs) {
+    if (logs.length === 0) {
+      document.getElementById("offline-table-container").innerHTML =
+        `<div class="empty-state"><div class="empty-icon">✓</div>No pending offline logs.<br/>All records are transferred.</div>`;
+      return;
+    }
+
+    // Build table rows — each row has an editable datetime input
+    // so admin can correct 1970 timestamps before transferring
+    let rows = logs.map(log => {
+      const rawTs   = log.captured_at || "";
+      const is1970  = rawTs.startsWith("1970") || rawTs.startsWith("offline-");
+      const tsClass = is1970 ? "ts-invalid" : "ts-valid";
+      const tsLabel = is1970 ? "⚠ Invalid" : rawTs.replace("T", " ").substring(0, 16);
+
+      // Default datetime-local value for the input
+      // If 1970 or invalid, default to today at noon
+      const now     = new Date();
+      const pad     = n => String(n).padStart(2,"0");
+      const defVal  = is1970
+        ? `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T12:00`
+        : rawTs.substring(0, 16);
+
+      return `
+        <tr>
+          <td class="td-name">${escHtml(log.rfid_uid)}</td>
+          <td>
+            <span class="meal-badge ${log.meal_type === "LUNCH" ? "lunch" : "dinner"}">
+              ${log.meal_type}
+            </span>
+          </td>
+          <td>
+            <span class="${tsClass}" style="font-family:var(--mono);font-size:11px;">
+              ${tsLabel}
+            </span>
+          </td>
+          <td>
+            <input type="datetime-local" id="ts-${log.id}" value="${defVal}" />
+          </td>
+          <td>
+            <button class="btn-transfer" id="btn-${log.id}"
+              onclick="transferRecord('${log.id}')">
+              Transfer
+            </button>
+          </td>
+        </tr>`;
+    }).join("");
+
+    document.getElementById("offline-table-container").innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>RFID UID</th>
+            <th>Meal Type</th>
+            <th>Captured At</th>
+            <th>Use Timestamp</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  // Transfer a single offline record
+  async function transferRecord(id) {
+    const btn       = document.getElementById("btn-" + id);
+    const tsInput   = document.getElementById("ts-" + id);
+    const useTime   = new Date(tsInput.value).toISOString();
+
+    btn.disabled    = true;
+    btn.textContent = "Sending...";
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/transfer_offline_record`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ offline_id: id, use_time: useTime })
+      });
+
+      const result = await res.text();
+      const clean  = result.replace(/"/g, "").trim();
+
+      if (clean === "TRANSFERRED") {
+        btn.textContent = "✓ Done";
+        btn.style.borderColor = "var(--accent)";
+        showToast("Record transferred to meal logs successfully.", "success");
+      } else if (clean === "DUPLICATE") {
+        btn.textContent = "Duplicate";
+        btn.style.borderColor = "var(--warning)";
+        btn.style.color       = "var(--warning)";
+        showToast("Duplicate detected — student already has this meal logged. Marked as transferred.", "success");
+      } else if (clean === "STUDENT_NOT_FOUND") {
+        btn.textContent = "No Student";
+        btn.disabled    = false;
+        showToast("This UID is not registered in the students table.", "error");
+      } else {
+        btn.textContent = "Error";
+        btn.disabled    = false;
+        showToast("Transfer failed: " + clean, "error");
+      }
+
+      // Refresh stats
+      loadStats();
+
+    } catch (e) {
+      btn.textContent = "Error";
+      btn.disabled    = false;
+      showToast("Network error during transfer.", "error");
+    }
+  }
+
+  // Transfer all pending offline records one by one
+  async function transferAll() {
+    if (offlineLogs.length === 0) {
+      showToast("No offline logs to transfer.", "error");
+      return;
+    }
+    const bulkBtn = document.getElementById("bulk-transfer-btn");
+    bulkBtn.disabled    = true;
+    bulkBtn.textContent = "Transferring...";
+
+    for (const log of offlineLogs) {
+      await transferRecord(log.id);
+    }
+
+    bulkBtn.disabled    = false;
+    bulkBtn.textContent = "Transfer All";
+    showToast("Bulk transfer complete.", "success");
+    loadOfflineLogs();
+  }
+
+</script>
+</body>
+</html>
